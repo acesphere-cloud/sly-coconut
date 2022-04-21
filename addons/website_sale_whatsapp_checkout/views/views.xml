@@ -1,0 +1,14 @@
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="website_sale_whatsapp_checkout.company_form">
+            <field name="name">website_sale_whatsapp_checkout form</field>
+            <field name="model">res.company</field>
+            <field name="inherit_id" ref="base.view_company_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='phone']" position="after">
+                    <field name="whatsapp_number" widget="phone "/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

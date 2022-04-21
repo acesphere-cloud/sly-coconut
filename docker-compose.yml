@@ -1,0 +1,46 @@
+version: '3.1'
+services:
+  odoo-app:
+    image: odoo:15.0
+    depends_on:
+      - postgres-db
+    volumes:
+      - odoo-app-data:/var/lib/odoo
+      - ./config:/etc/odoo
+      - ./addons:/mnt/extra-addons
+    environment:
+      - HOST=postgres-db
+      - PASSWORD_FILE=/run/secrets/postgresql_password
+    secrets:
+      - postgresql_password
+  postgres-db:
+    image: postgres:13
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_PASSWORD_FILE=/run/secrets/postgresql_password
+      - POSTGRES_USER=odoo
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres-db-data:/var/lib/postgresql/data/pgdata
+    secrets:
+      - postgresql_password
+  traefik-web:
+    build:
+      context: .
+      dockerfile: ./compose/production/traefik/Dockerfile
+    image: traefik
+    depends_on:
+      - odoo-app
+    volumes:
+      - traefik-web-data:/etc/traefik/acme:z
+    ports:
+      - "0.0.0.0:80:8069"
+
+volumes:
+  odoo-app-data:
+  postgres-db-data:
+  traefik-web-data:
+
+secrets:
+  postgresql_password:
+    file: ./.secrets/odoo_pg_pass

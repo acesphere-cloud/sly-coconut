@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="website_sale_whatsapp_checkout.seq_order_checkout" model="ir.sequence">
+            <field name="name">WhatsApp Checkout Sequence</field>
+            <field name="code">whatsapp.checkout.number</field>
+            <field name="prefix">WO-</field>
+            <field name="padding">4</field>
+        </record>
+    </data>
+</odoo>

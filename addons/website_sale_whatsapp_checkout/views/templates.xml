@@ -1,0 +1,221 @@
+<odoo>
+    <data>
+        <template id="assets_frontend" inherit_id="website_sale.assets_frontend">
+            <xpath expr="script[last()]" position="after">
+                <script type="text/javascript" src="/website_sale_whatsapp_checkout/static/src/js/whatsapp.js"/>
+            </xpath>
+        </template>
+
+        <template id="cart" inherit_id="website_sale.cart">
+            <xpath expr="//div[hasclass('row')]//a[hasclass('btn','btn-primary','float-right')][@href='/shop/checkout?express=1']"
+                   position="replace">
+                <a role="button" t-if="website_sale_order and website_sale_order.website_order_line"
+                   class="btn btn-primary float-right d-none d-xl-inline-block" href="/shop/whatsapp_checkout">
+                    <span class="">Process WhatsApp Checkout</span>
+                    <span class="fa fa-chevron-right"/>
+                </a>
+            </xpath>
+            <xpath expr="//div[@id='o_cart_summary']//a[hasclass('btn','btn-primary','float-right')][@href='/shop/checkout?express=1']"
+                   position="replace">
+                <a role="button" t-if="website_sale_order and website_sale_order.website_order_line"
+                   class="btn btn-primary float-right" href="/shop/whatsapp_checkout">
+                    <span class="">Process WhatsApp Checkout</span>
+                    <span class="fa fa-chevron-right"/>
+                </a>
+            </xpath>
+        </template>
+
+        <template id="short_cart_summary" inherit_id="website_sale.short_cart_summary">
+            <xpath expr="//div/a[hasclass('btn', 'btn-secondary', 'float-right', 'd-none', 'd-xl-inline-block')][@href='/shop/checkout?express=1']"
+                   position="replace">
+                <a role="button" t-if="website_sale_order and website_sale_order.website_order_line"
+                   class="btn btn-secondary float-right d-none d-xl-inline-block" href="/shop/whatsapp_checkout">
+                    <span>Process WhatsApp Checkout</span>
+                </a>
+            </xpath>
+        </template>
+
+        <template id="wizard_checkout" inherit_id="website_sale.wizard_checkout">
+            <!-- Add a "flag element" to trigger style variation -->
+            <xpath expr="//div[hasclass('wizard')]/div" position="before">
+                <span class="o_wizard_has_extra_step d-none"/>
+            </xpath>
+            <xpath expr="//div[@id='wizard-step10']" position="after">
+                <a class="no-decoration" t-att-href="step&gt;=15 and '/shop/whatsapp_checkout' or '#'">
+                    <div id="wizard-step30"
+                         t-att-class="'progress-wizard-step %s' % (step == 15 and 'active' or step&gt;15 and 'complete' or 'disabled')">
+                        <div class="progress-wizard-bar d-none d-md-block"/>
+                        <span class="progress-wizard-dot d-none d-md-inline-block"/>
+                        <div class="text-center progress-wizard-steplabel">WhatsApp Checkout</div>
+                    </div>
+                </a>
+            </xpath>
+        </template>
+
+        <template id="whatsapp_checkout" name="WhatsApp Checkout">
+            <t t-call="website.layout">
+                <t t-set="no_footer">1</t>
+                <div id="wrap">
+                    <div class="container oe_website_sale py-2">
+                        <div class="row">
+                            <div class="col-12">
+                                <t t-call="website_sale.wizard_checkout">
+                                    <t t-set="step" t-value="15"/>
+                                </t>
+                            </div>
+                            <div class="col-12 col-xl-auto order-xl-2 d-none d-xl-block">
+                                <t t-call="website_sale.cart_summary"/>
+                            </div>
+
+                            <div class="col-12 col-xl order-xl-1 oe_cart">
+                                <form target="_new" action="/shop/checkout_whatsapp" method="post" id="checkout_form"
+                                      class="w-100">
+                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                    <div>
+                                        <div class="row">
+                                            <div class="col">
+                                                <div class="form-group row form-field o_website_form_custom">
+                                                    <div class="col-lg-3 col-md-4 text-md-right">
+                                                        <label class="col-form-label" for="order_details">Your Order
+                                                            Details
+                                                        </label>
+                                                    </div>
+                                                    <div class="col-lg-9 col-md-8">
+                                                        <textarea class="form-control o_website_form_input"
+                                                                  rows="8"
+                                                                  name="order_details"
+                                                                  disabled="1"><t t-esc="ui_message"/>
+                                                        </textarea>
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group row form-field o_website_form_custom">
+                                                    <div class="col-lg-3 col-md-4 text-md-right">
+                                                        <label class="col-form-label label-optional"
+                                                               for="additional_msg">
+                                                            Add Some Message (optional)
+                                                        </label>
+                                                    </div>
+                                                    <div class="col-lg-9 col-md-8">
+                                                        <textarea class="form-control o_website_form_input" rows="3"
+                                                                  name="additional_msg"
+                                                                  placeholder="eg. pickup or deliver time, urgency of order, suggestion, feedback etc."/>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row mt-3">
+                                            <div class="col">
+                                                <h3 class="mb24">WhatsApp Checkout Method</h3>
+                                                <div class="card w-100 bg-info">
+                                                    <div class="card-body ">
+                                                        <form class="form-group">
+                                                            <div class="custom-control custom-radio m-3">
+                                                                <input type="radio" class="custom-control-input"
+                                                                       checked="1"
+                                                                       id="self_pick" name="checkout_method"/>
+                                                                <label class="custom-control-label" for="self_pick">
+                                                                    Pick &amp; Pay at Store (Pick order yourself)
+                                                                </label>
+                                                            </div>
+
+                                                            <div class="custom-control custom-radio m-3">
+                                                                <input type="radio" class="custom-control-input"
+                                                                       id="home_delivery"
+                                                                       name="checkout_method" value="Home Delivery"/>
+                                                                <label class="custom-control-label" for="home_delivery">
+                                                                    Pay on Delivery (Deliver at your address)
+                                                                </label>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row mt-3 mb-5 float-left">
+                                            <div class="col">
+                                                <a role="button"
+                                                   class="btn btn-secondary" href="/shop/cart">
+                                                    <span class="fa fa-chevron-left"/>
+                                                    <span class="">Return to Cart</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="row mt-3 float-right">
+                                            <div class="col">
+                                                <a role="button" id="self_check_out"
+                                                   class="btn btn-primary a-submit" href="#">
+                                                    <span class="">WhatsApp Checkout</span>
+                                                    <span class="fa fa-chevron-right"/>
+                                                </a>
+                                                <a role="button" id="check_address"
+                                                   class="btn btn-primary d-none a-submit" href="#">
+                                                    <span class="">Confirm Your Address</span>
+                                                    <span class="fa fa-chevron-right"/>
+                                                </a>
+                                                <input type="hidden" id="method_type" name="method_type"
+                                                       value="self_pick"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </template>
+
+        <template id="payment" inherit_id="website_sale.payment">
+            <xpath expr="//div[hasclass('col-12','col-xl','order-xl-1','oe_cart')]" position="replace">
+                <div class="col-12 col-xl order-xl-1 oe_cart">
+                    <div class="card">
+                        <div class="card-body" id="shipping_and_billing">
+                            <a class='float-right no-decoration' href='/shop/checkout'>
+                                <i class="fa fa-edit"/>
+                                Edit
+                            </a>
+                            <t t-set="same_shipping"
+                               t-value="bool(order.partner_shipping_id==order.partner_id or only_services)"/>
+                            <div>
+                                <b>Billing <t t-if="same_shipping and not only_services">&amp; Shipping</t>:
+                                </b>
+                                <span t-esc='order.partner_id'
+                                      t-options="dict(widget='contact', fields=['address'], no_marker=True, separator=', ')"
+                                      class="address-inline"/>
+                            </div>
+                            <div t-if="not same_shipping and not only_services"
+                                 groups="sale.group_delivery_invoice_address">
+                                <b>Shipping:</b>
+                                <span t-esc='order.partner_shipping_id'
+                                      t-options="dict(widget='contact', fields=['address'], no_marker=True, separator=', ')"
+                                      class="address-inline"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3 mb-5">
+                        <div class="row float-left">
+                            <div class="col">
+                                <a role="button"
+                                   class="btn btn-secondary" href="/shop/cart">
+                                    <span class="fa fa-chevron-left"/>
+                                    <span class="">Return to Cart</span>
+                                </a>
+                            </div>
+                        </div>
+                        <form target="_new" action="/shop/checkout_whatsapp" method="post" class="float-right">
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                            <a role="button" class="btn btn-primary a-submit" href="#" id="address_checked">
+                                <span>WhatsApp Checkout
+                                    <span class="fa fa-chevron-right"/>
+                                </span>
+                            </a>
+                            <input type="hidden" id="method_type" name="address_checked"
+                                   value="delivery_address_check"/>
+                        </form>
+                    </div>
+                </div>
+            </xpath>
+        </template>
+    </data>
+</odoo>

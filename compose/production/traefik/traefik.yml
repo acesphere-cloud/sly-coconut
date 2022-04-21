@@ -1,0 +1,40 @@
+log:
+  level: INFO
+
+entryPoints:
+  odoo-xmlrpc:
+    # Odoo Service
+    address: ":8069"
+  odoo-xmlrpcs:
+    # Odoo Service
+    address: ":8071"
+  odoo-longpolling:
+    # Odoo Chat
+    address: ":8072"
+
+http:
+  routers:
+    odoo-web-router:
+      rule: "Method(`GET`, `POST`)"
+      entryPoints:
+        - odoo-xmlrpc
+        - odoo-xmlrpcs
+        - odoo-longpolling
+      service: odoo-app
+  middlewares:
+    csrf:
+      # https://docs.traefik.io/master/middlewares/headers/#hostsproxyheaders
+      # https://docs.djangoproject.com/en/dev/ref/csrf/#ajax
+      headers:
+        hostsProxyHeaders: ["X-CSRFToken", "X-Forwarded-Host"]
+  services:
+    odoo-app:
+      loadBalancer:
+        servers:
+          - url: http://odoo-app:8069
+
+providers:
+  # https://docs.traefik.io/master/providers/file/
+  file:
+    filename: /etc/traefik/traefik.yml
+    watch: true
