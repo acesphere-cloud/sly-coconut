@@ -13,7 +13,6 @@ class WebsiteSaleWhatsapp(WebsiteSale):
     def address(self, **kw):
         res = super(WebsiteSaleWhatsapp, self).address()
         user_id = request.env.user
-        print("user_idd", user_id)
         if user_id._is_public():
             return request.redirect('/web/login')
         return res

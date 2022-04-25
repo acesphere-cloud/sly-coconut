@@ -34,7 +34,8 @@ services:
     volumes:
       - traefik-web-data:/etc/traefik/acme:z
     ports:
-      - "0.0.0.0:80:8069"
+      - "0.0.0.0:7000:8069"
+      - "0.0.0.0:8072:8072"
 
 volumes:
   odoo-app-data:

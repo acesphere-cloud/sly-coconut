@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # This module and its content is copyright of Technaureus Info Solutions Pvt. Ltd.
-# - © Technaureus Info Solutions Pvt. Ltd 2020. All rights reserved.
+# - © Technaureus Info Solutions Pvt. Ltd 2021. All rights reserved.
 
 
 from odoo import fields, http, tools, _
@@ -29,19 +29,14 @@ class WebsiteSale(WebsiteSale):
     @http.route(['/shop/whatsapp_checkout'], type='http', auth="public", website=True, sitemap=False)
     def whatsapp_checkout(self, **post):
         mobile_num, message_string = self._get_checkout_data()
-        return request.redirect("https://web.whatsapp.com/send?phone=" + mobile_num + "&text=" + message_string)
+        url = "https://web.whatsapp.com/send?phone=" + mobile_num + "&text=" + message_string
+        return werkzeug.utils.redirect(url)
 
     @http.route(['/shop/whatsapp_checkout/api'], type='http', auth="public", website=True, sitemap=False)
     def whatsapp_checkout_api(self, **post):
         mobile_num, message_string = self._get_checkout_data()
-        return request.redirect("https://api.whatsapp.com/send?phone=" + mobile_num + "&text=" + message_string)
-
-    @http.route(['/shop/clear_cart'], type='json', auth="public", website=True)
-    def clear_cart(self):
-        order = request.website.sale_get_order()
-        if order:
-            for line in order.website_order_line:
-                line.unlink()
+        url = "https://api.whatsapp.com/send?phone=" + mobile_num + "&text=" + message_string
+        return werkzeug.utils.redirect(url)
 
     @http.route(['/shop/cart'], type='http', auth="public", website=True, sitemap=False)
     def cart(self, access_token=None, revive='', **post):
@@ -89,6 +84,7 @@ class WebsiteSale(WebsiteSale):
             'error': message,
             'whatsapp_checkout_user': whatsapp_checkout_user
         })
+
         if order:
             _order = order
             if not request.env.context.get('pricelist'):
